@@ -1,0 +1,3 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The domain layer has no framework, database or UI dependencies. -->
+</Project>

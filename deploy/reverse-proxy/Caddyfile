@@ -1,0 +1,26 @@
+# TLS terminates here. For a public DNS name Caddy obtains and renews certificates automatically (ACME);
+# for "localhost" or internal names it issues certificates from its own local CA. See docs/deployment.md.
+{
+	servers {
+		# Request headers larger than this are rejected before reaching the API.
+		max_header_size 32KB
+	}
+}
+
+{$NOTIFYHUB_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+
+	request_body {
+		max_size 2MB
+	}
+
+	# WebSockets (SignalR) are proxied transparently.
+	reverse_proxy api:8080 {
+		header_up X-Forwarded-Proto {scheme}
+	}
+}

@@ -1,0 +1,3 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Versioned wire contracts shared by the API, Windows service and agent. No references to Domain. -->
+</Project>

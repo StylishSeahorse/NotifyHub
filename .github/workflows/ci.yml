@@ -1,0 +1,75 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_NOLOGO: "1"
+  CI: "true"
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore tools and packages
+        run: |
+          dotnet tool restore
+          dotnet restore NotifyHub.slnx
+
+      - name: Verify formatting
+        run: dotnet format NotifyHub.slnx --no-restore --verify-no-changes
+
+      - name: Build (warnings are errors)
+        run: dotnet build NotifyHub.slnx --no-restore -c Release
+
+      - name: Unit tests
+        run: dotnet test tests/NotifyHub.UnitTests --no-build -c Release --logger trx --results-directory TestResults
+
+      # Testcontainers starts PostgreSQL in Docker (available on GitHub-hosted Ubuntu runners).
+      - name: Integration tests (real PostgreSQL)
+        run: dotnet test tests/NotifyHub.IntegrationTests --no-build -c Release --logger trx --results-directory TestResults
+
+      - name: Verify migrations script generates
+        run: dotnet ef migrations script --idempotent -p src/NotifyHub.Infrastructure -s src/NotifyHub.Infrastructure -o artifacts/migrations.sql --no-build --configuration Release
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            TestResults/
+            artifacts/migrations.sql
+
+  container-images:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate compose file
+        run: |
+          cp deploy/.env.example deploy/.env
+          docker compose -f deploy/docker-compose.yml --env-file deploy/.env config --quiet
+
+      - name: Build API image
+        run: docker build -f deploy/docker/Dockerfile --target api -t notifyhub-api:ci .
+
+      - name: Build worker image
+        run: docker build -f deploy/docker/Dockerfile --target worker -t notifyhub-worker:ci .

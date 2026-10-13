@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/NotifyHub.Api/NotifyHub.Api.csproj" />
+    <Project Path="src/NotifyHub.Application/NotifyHub.Application.csproj" />
+    <Project Path="src/NotifyHub.Contracts/NotifyHub.Contracts.csproj" />
+    <Project Path="src/NotifyHub.Domain/NotifyHub.Domain.csproj" />
+    <Project Path="src/NotifyHub.Infrastructure/NotifyHub.Infrastructure.csproj" />
+    <Project Path="src/NotifyHub.Worker/NotifyHub.Worker.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/NotifyHub.IntegrationTests/NotifyHub.IntegrationTests.csproj" />
+    <Project Path="tests/NotifyHub.UnitTests/NotifyHub.UnitTests.csproj" />
+  </Folder>
+</Solution>

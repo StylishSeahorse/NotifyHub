@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\NotifyHub.Domain\NotifyHub.Domain.csproj" />
+    <ProjectReference Include="..\NotifyHub.Contracts\NotifyHub.Contracts.csproj" />
+  </ItemGroup>
+</Project>
